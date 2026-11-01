@@ -3,6 +3,7 @@ import { Moon, Sun } from 'lucide-react';
 import { Hero } from './components/layout/Hero';
 import { About } from './components/layout/About';
 import { SectionTitle } from './components/ui/SectionTitle';
+import { Experience } from './components/layout/Experience';
 
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
@@ -35,6 +36,9 @@ export default function App() {
 
         {/* SESSÃO SOBRE MIM */}
         <About />
+
+        {/* SESSÃO EXPERIÊNCIA */}
+        <Experience />
 
         {/* ESPAÇO PARA A SESSÃO DE PROJETOS QUE FAREMOS DEPOIS */}
         <section id="projetos" className="min-h-screen py-20 px-6 max-w-[1200px] mx-auto">
