@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Garante rolagem suave ao clicar nos links do menu */
+html {
+  scroll-behavior: smooth;
+}
