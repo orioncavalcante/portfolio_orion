@@ -9,8 +9,10 @@ function getAsset(keyword, fallbackUrl) {
   return foundKey ? assetFiles[foundKey] : fallbackUrl;
 }
 
-const gramaImg = getAsset('grama', '/assets/grama.png');
-const nuvemImg = getAsset('nuvem', '/assets/nuvem.png');
+const gramaImg = getAsset('grama.png', '/assets/grama.png');
+const gramaNoiteImg = getAsset('grama_noite.png', '/assets/grama_noite.png');
+const nuvemImg = getAsset('nuvem.png', '/assets/nuvem.png');
+const nuvemNoiteImg = getAsset('nuvem_noite.png', '/assets/nuvem_noite.png');
 const pastaImg = getAsset('pasta', '/assets/pasta.png');
 
 export function Experience() {
@@ -44,7 +46,7 @@ export function Experience() {
   ];
 
   return (
-    <section id="experiencia" className="relative w-full h-[90vh] min-h-[650px] md:min-h-[700px] dark:bg-zinc-900 overflow-hidden select-none transition-colors duration-300 flex items-end">
+    <section id="experiencia" className="relative w-full h-[90vh] min-h-[650px] md:min-h-[700px] dark:bg-zinc-800 overflow-hidden select-none transition-colors duration-300 flex items-end">
       
       <style>{`
         @keyframes cloud-drift {
@@ -61,9 +63,12 @@ export function Experience() {
       `}</style>
 
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <img src={nuvemImg} alt="Nuvem" className="absolute top-[12%] left-0 w-28 md:w-44 opacity-90 object-contain animate-cloud-1 drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
-        <img src={nuvemImg} alt="Nuvem" className="absolute top-[35%] left-0 w-20 md:w-32 opacity-70 object-contain animate-cloud-2 drop-shadow-sm" style={{ imageRendering: 'pixelated' }} />
-        <img src={nuvemImg} alt="Nuvem" className="absolute top-[20%] left-0 w-24 md:w-40 opacity-100 object-contain animate-cloud-3 hidden sm:block drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+        <img src={nuvemImg} alt="Nuvem" className="dark:hidden absolute top-[12%] left-0 w-28 md:w-44 opacity-90 object-contain animate-cloud-1 drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+        <img src={nuvemNoiteImg} alt="Nuvem" className="hidden dark:block absolute top-[12%] left-0 w-28 md:w-44 opacity-90 object-contain animate-cloud-1 drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+        <img src={nuvemImg} alt="Nuvem" className="dark:hidden absolute top-[35%] left-0 w-20 md:w-32 opacity-70 object-contain animate-cloud-2 drop-shadow-sm" style={{ imageRendering: 'pixelated' }} />
+        <img src={nuvemNoiteImg} alt="Nuvem" className="hidden dark:block absolute top-[35%] left-0 w-20 md:w-32 opacity-70 object-contain animate-cloud-2 drop-shadow-sm" style={{ imageRendering: 'pixelated' }} />
+        <img src={nuvemImg} alt="Nuvem" className="dark:hidden absolute top-[20%] left-0 w-24 md:w-40 opacity-100 object-contain animate-cloud-3 hidden sm:block drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+        <img src={nuvemNoiteImg} alt="Nuvem" className="hidden dark:sm:block absolute top-[20%] left-0 w-24 md:w-40 opacity-100 object-contain animate-cloud-3 drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
       </div>
 
       <div className="absolute left-[4%] top-[8%] z-10 flex flex-col font-black text-[#DE1B1B] leading-[0.82] tracking-tighter pointer-events-none" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
@@ -74,7 +79,8 @@ export function Experience() {
       </div>
 
       <div className="absolute inset-x-0 bottom-0 w-full h-[35%] md:h-[45%] z-20 pointer-events-none">
-        <img src={gramaImg} alt="Grama" className="w-full h-full object-cover object-top dark:brightness-75 dark:contrast-125 transition-all duration-500" draggable="false" />
+        <img src={gramaImg} alt="Grama" className="w-full h-full object-cover object-top dark:hidden transition-all duration-500" draggable="false" />
+        <img src={gramaNoiteImg} alt="Grama" className="hidden dark:block w-full h-full object-cover object-top scale-[1.25] origin-bottom transition-all duration-500" draggable="false" />
       </div>
 
       <div className="absolute inset-0 z-30 max-w-[1400px] mx-auto overflow-y-auto md:overflow-visible hide-scroll flex flex-col md:block items-center gap-20 pt-[45vh] pb-[25vh] md:p-0">
@@ -87,7 +93,7 @@ export function Experience() {
             
             {activeFolder === exp.id && (
               <div 
-                className="absolute bottom-[105%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[320px] md:max-w-[420px] bg-white dark:bg-zinc-950 border-[3px] border-black p-4 md:p-6 shadow-[6px_6px_0px_#DE1B1B] md:shadow-[8px_8px_0px_#DE1B1B] z-50 cursor-default animate-in fade-in zoom-in duration-200"
+                className="absolute bottom-[105%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[320px] md:max-w-[420px] bg-white dark:bg-zinc-800 border-[3px] border-black p-4 md:p-6 shadow-[6px_6px_0px_#DE1B1B] md:shadow-[8px_8px_0px_#DE1B1B] z-50 cursor-default animate-in fade-in zoom-in duration-200"
                 onClick={(e) => e.stopPropagation()} 
               >
                 <div className="flex justify-between items-start border-b-[3px] border-black pb-2 mb-3 md:mb-4">
@@ -115,7 +121,7 @@ export function Experience() {
                 </ul>
 
                 <div className="absolute -bottom-[14px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[14px] border-t-black"></div>
-                <div className="absolute -bottom-[9px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[10px] border-t-white dark:border-t-zinc-950"></div>
+                <div className="absolute -bottom-[9px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[10px] border-t-white dark:border-t-zinc-800"></div>
               </div>
             )}
 

@@ -16,7 +16,8 @@ function getAsset(keyword, fallbackUrl = '') {
     return foundKey ? assetFiles[foundKey] : fallbackUrl;
 }
 
-const gramaImg = getAsset('grama');
+const gramaImg = getAsset('grama.png');
+const gramaNoiteImg = getAsset('grama_noite.png');
 const cogumeloImg = getAsset('cogumelo');
 
 // ============================================================================
@@ -97,14 +98,14 @@ export function Contact() {
         }
     };
 
-    const inputBase = 'w-full bg-white dark:bg-zinc-900 border-2 border-black p-3 text-base text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-[#DE1B1B] transition-colors rounded-none';
+    const inputBase = 'w-full bg-white dark:bg-zinc-800 border-2 border-black p-3 text-base text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-[#DE1B1B] transition-colors rounded-none';
     const labelBase = 'text-sm font-black font-mono uppercase text-black dark:text-white';
     const erroBase = 'text-[10px] font-bold font-mono uppercase text-red-600 bg-red-100 dark:bg-red-900/30 p-1 inline-block mt-1';
 
     return (
         <section
             id="contato"
-            className="relative overflow-hidden dark:bg-zinc-900 min-h-screen flex flex-col pt-16 md:pt-24"
+            className="relative overflow-hidden dark:bg-zinc-800 min-h-screen flex flex-col pt-16 md:pt-24"
         >
             <style>{`
                 @keyframes cogu-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
@@ -240,7 +241,10 @@ export function Contact() {
             {/* ================= FUNDO: COLINA DE GRAMA + COGUMELOS IMAGENS ================= */}
             <div className="absolute inset-x-0 bottom-0 w-full h-[30%] md:h-[40%] z-10 pointer-events-none">
                 {gramaImg && (
-                    <img src={gramaImg} alt="Grama" className="w-full h-full object-cover object-top dark:brightness-75 dark:contrast-125" draggable="false" />
+                    <img src={gramaImg} alt="Grama" className="w-full h-full object-cover object-top dark:hidden" draggable="false" />
+                )}
+                {gramaNoiteImg && (
+                    <img src={gramaNoiteImg} alt="Grama noturna" className="hidden dark:block w-full h-full object-cover object-top scale-[1.75] origin-bottom" draggable="false" />
                 )}
                 
                 {cogumeloImg && (

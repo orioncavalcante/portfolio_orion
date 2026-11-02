@@ -42,7 +42,7 @@ export function About() {
                     </div>
                 </div>
 
-                <div className="w-full md:w-[400px] border-4 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6 shadow-[8px_8px_0px_#DE1B1B]">
+                <div className="w-full md:w-[400px] border-4 border-black dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-[8px_8px_0px_#DE1B1B]">
                     <h3 className="font-black text-xl mb-4 uppercase">Principais Stacks</h3>
                     <ul className="grid grid-cols-2 gap-4">
                         {skills.map((skill) => (

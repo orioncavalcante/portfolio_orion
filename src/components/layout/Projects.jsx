@@ -84,7 +84,7 @@ export function Projects() {
     // 3. LAYOUT DA TELA
     // ==========================================
     return (
-        <section id="projetos" className="py-24 px-6 max-w-[1200px] mx-auto min-h-screen dark:bg-zinc-900 transition-colors duration-300 flex flex-col justify-center">
+        <section id="projetos" className="py-24 px-6 max-w-[1200px] mx-auto min-h-screen dark:bg-zinc-800 transition-colors duration-300 flex flex-col justify-center">
             
             <div className="mb-16">
                 <h2 
@@ -136,7 +136,7 @@ export function Projects() {
                                 href={projeto.html_url} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex-1 bg-white dark:bg-zinc-900 text-black dark:text-white border-2 border-black dark:border-zinc-700 text-center font-black font-mono text-xs py-3 shadow-[4px_4px_0px_#000] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000] transition-all"
+                                className="flex-1 bg-white dark:bg-zinc-800 text-black dark:text-white border-2 border-black dark:border-zinc-700 text-center font-black font-mono text-xs py-3 shadow-[4px_4px_0px_#000] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000] transition-all"
                             >
                                 VER CÓDIGO
                             </a>

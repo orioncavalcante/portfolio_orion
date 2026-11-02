@@ -16,9 +16,9 @@ export default function App() {
   }, [theme]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono">
+    <div className="min-h-screen bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono">
       {/* NAVBAR FLUTUANTE */}
-      <header className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm border-b-2 border-black dark:border-zinc-800 transition-colors">
+      <header className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border-b-2 border-black dark:border-zinc-800 transition-colors">
         <span className="font-bold text-sm tracking-tight">ORION.DEV</span>
         <nav className="flex items-center gap-6 text-sm">
           <a href="#projetos" className="hover:text-[#DE1B1B] transition-colors">Projetos</a>
