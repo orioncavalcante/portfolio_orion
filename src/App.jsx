@@ -5,6 +5,7 @@ import { About } from './components/layout/About';
 import { SectionTitle } from './components/ui/SectionTitle';
 import { Experience } from './components/layout/Experience';
 import { Projects } from './components/layout/Projects';
+import { Contact } from './components/layout/Contact';
 
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
@@ -43,6 +44,8 @@ export default function App() {
 
         {/* ESPAÇO PARA A SESSÃO DE PROJETOS QUE FAREMOS DEPOIS */}
         <Projects />
+
+        <Contact />
       </main>
     </div>
   );
