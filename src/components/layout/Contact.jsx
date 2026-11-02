@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-// import emailjs from '@emailjs/browser';
+import emailjs from '@emailjs/browser';
 
 // ============================================================================
 // 0. ASSETS LOCAIS (Grama e Cogumelo)
@@ -75,14 +75,23 @@ export function Contact() {
 
     const enviarMensagem = async (dados) => {
         try {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            console.log('Dados prontos para envio:', dados);
+            // Disparo real via EmailJS usando as variáveis do arquivo .env
+            await emailjs.send(
+                import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                {
+                    from_name: dados.nome,
+                    from_email: dados.email,
+                    message: dados.mensagem,
+                },
+                import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+            );
 
             setStatusEnvio('sucesso');
             reset();
             setTimeout(() => setStatusEnvio(null), 5000);
         } catch (erro) {
-            console.error('Erro ao enviar:', erro);
+            console.error('Erro ao enviar e-mail:', erro);
             setStatusEnvio('erro');
             setTimeout(() => setStatusEnvio(null), 5000);
         }
