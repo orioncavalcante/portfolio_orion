@@ -4,6 +4,7 @@ import { Hero } from './components/layout/Hero';
 import { About } from './components/layout/About';
 import { SectionTitle } from './components/ui/SectionTitle';
 import { Experience } from './components/layout/Experience';
+import { Projects } from './components/layout/Projects';
 
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
@@ -41,12 +42,7 @@ export default function App() {
         <Experience />
 
         {/* ESPAÇO PARA A SESSÃO DE PROJETOS QUE FAREMOS DEPOIS */}
-        <section id="projetos" className="min-h-screen py-20 px-6 max-w-[1200px] mx-auto">
-          <SectionTitle>Meus Projetos</SectionTitle>
-          <div className="w-full h-64 border-4 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-500">
-            Aqui vão entrar os cards do GitHub na próxima etapa...
-          </div>
-        </section>
+        <Projects />
       </main>
     </div>
   );
