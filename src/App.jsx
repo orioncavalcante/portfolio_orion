@@ -1,96 +1,66 @@
-import { useState, useEffect } from 'react';
-import { Moon, Sun, Menu, X } from 'lucide-react';
-import { Hero } from './components/layout/Hero';
-import { About } from './components/layout/About';
-import { Experience } from './components/layout/Experience';
-import { Projects } from './components/layout/Projects';
-import { Contact } from './components/layout/Contact';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeToggle } from './components/ui/ThemeToggle';
 
-const links = [
-  { href: '#inicio', label: 'Início' },
-  { href: '#sobre', label: 'Sobre' },
-  { href: '#experiencia', label: 'Experiência' },
-  { href: '#projetos', label: 'Projetos' },
-  { href: '#contato', label: 'Contato' },
-];
+// Páginas
+import { Home } from './pages/Home';
+import { Login } from './pages/Login';
+
+// Componente para proteger rotas (Só passa quem tem `user`)
+function RotaProtegida({ children }) {
+    const { user, loadingAuth } = useAuth();
+
+    if (loadingAuth) return <div className="min-h-screen flex items-center justify-center dark:bg-zinc-900 font-mono font-bold dark:text-white">CARREGANDO...</div>;
+    
+    // Se não tiver logado, expulsa para o login
+    if (!user) return <Navigate to="/login" />;
+    
+    return children;
+}
 
 export default function App() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const btn =
-    'p-2 border-2 border-black dark:border-zinc-600 shadow-[2px_2px_0px_#000] dark:shadow-[2px_2px_0px_#fff] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer transition-all';
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono">
-      {/* NAVBAR FLUTUANTE */}
-      <header className="fixed top-4 inset-x-0 z-50 px-4 sm:px-6 pointer-events-none">
-        <div className="pointer-events-auto max-w-[1100px] mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-2 border-black dark:border-zinc-600 shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#fff] transition-colors">
-          <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3">
-            <a href="#inicio" className="font-bold text-sm tracking-tight shrink-0">
-              ORION<span className="text-[#DE1B1B]">.DEV</span>
-            </a>
-
-            {/* Links desktop */}
-            <nav className="hidden md:flex items-center gap-6 text-sm">
-              {links.map((l) => (
-                <a key={l.href} href={l.href} className="hover:text-[#DE1B1B] transition-colors">
-                  {l.label}
-                </a>
-              ))}
-            </nav>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                aria-label="Alternar tema"
-                className={btn}
-              >
-                {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-              </button>
-
-              {/* Botão hambúrguer (só mobile) */}
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                aria-label="Abrir menu"
-                aria-expanded={menuOpen}
-                className={`${btn} md:hidden`}
-              >
-                {menuOpen ? <X size={16} /> : <Menu size={16} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Menu mobile */}
-          {menuOpen && (
-            <nav className="md:hidden flex flex-col border-t-2 border-black dark:border-zinc-600">
-              {links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="px-4 py-3 text-sm border-b-2 last:border-b-0 border-black/10 dark:border-zinc-700 hover:text-[#DE1B1B] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  {l.label}
-                </a>
-              ))}
-            </nav>
-          )}
-        </div>
-      </header>
-
-      <main>
-        <Hero />
-        <About />
-        <Experience />
-        <Projects />
-        <Contact />
-      </main>
-    </div>
-  );
+    return (
+        <AuthProvider>
+            <ThemeProvider>
+                <ThemeToggle />
+                
+                {/* O BrowserRouter controla as URLs lá em cima no navegador */}
+                <BrowserRouter>
+                    <Routes>
+                        {/* Rota principal do seu Portfólio */}
+                        <Route path="/" element={<Home />} />
+                        
+                        {/* Rota de Login */}
+                        <Route path="/login" element={<Login />} />
+                        
+                        {/* Rota do Dashboard (Protegida!) */}
+                        <Route 
+                            path="/dashboard" 
+                            element={
+                                <RotaProtegida>
+                                    <div className="min-h-screen p-10 dark:bg-zinc-900 dark:text-white font-mono font-bold">
+                                        <h1 className="text-4xl text-[#DE1B1B] mb-4">DASHBOARD EM CONSTRUÇÃO 🍄</h1>
+                                        <p>Bem-vindo! Você conseguiu burlar a segurança e fazer login.</p>
+                                    </div>
+                                </RotaProtegida>
+                            } 
+                        />
+                        
+                        {/* Requisito 1: Página amigável para Rota Inexistente (404) */}
+                        <Route 
+                            path="*" 
+                            element={
+                                <div className="min-h-screen flex flex-col items-center justify-center dark:bg-zinc-900 font-mono p-6 text-center">
+                                    <h1 className="text-9xl font-black text-[#DE1B1B] border-4 border-black bg-[#FEF08A] p-4 shadow-[8px_8px_0px_#000] mb-6">404</h1>
+                                    <p className="font-bold text-xl dark:text-white mb-4">Página não encontrada!</p>
+                                    <a href="/" className="bg-black text-white p-3 border-2 border-black hover:bg-[#DE1B1B] transition-colors">VOLTAR AO INÍCIO</a>
+                                </div>
+                            } 
+                        />
+                    </Routes>
+                </BrowserRouter>
+            </ThemeProvider>
+        </AuthProvider>
+    );
 }
