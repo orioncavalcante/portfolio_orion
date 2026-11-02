@@ -134,6 +134,7 @@ export function Hero() {
 
   return (
     <section
+      id="inicio"
       ref={sectionRef}
       className="relative w-full bg-white dark:bg-zinc-800 overflow-hidden select-none transition-colors duration-300"
       style={{ '--u': 'max(1vw, 6px)', height: height ?? '100svh' }}
