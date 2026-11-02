@@ -46,7 +46,7 @@ export function Experience() {
   ];
 
   return (
-    <section id="experiencia" className="relative w-full h-[90vh] min-h-[650px] md:min-h-[700px] dark:bg-zinc-800 overflow-hidden select-none transition-colors duration-300 flex items-end">
+    <section id="experiencia" className="relative w-full min-h-[650px] md:h-[90vh] md:min-h-[700px] dark:bg-zinc-800 overflow-hidden select-none transition-colors duration-300 flex flex-col items-stretch md:flex-row md:items-end">
       
       <style>{`
         @keyframes cloud-drift {
@@ -71,19 +71,19 @@ export function Experience() {
         <img src={nuvemNoiteImg} alt="Nuvem" className="hidden dark:sm:block absolute top-[20%] left-0 w-24 md:w-40 opacity-100 object-contain animate-cloud-3 drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
       </div>
 
-      <div className="absolute left-[4%] top-[8%] z-10 flex flex-col font-black text-[#DE1B1B] leading-[0.82] tracking-tighter pointer-events-none" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
+      <div className="relative self-start left-[4%] mt-12 md:mt-0 md:absolute md:top-[8%] z-10 flex flex-col font-black text-[#DE1B1B] leading-[0.82] tracking-tighter pointer-events-none" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
         <span className="text-[15vw] md:text-[130px] scale-x-110 origin-left">EXP</span>
         <span className="text-[15vw] md:text-[130px] scale-x-110 origin-left">ERI</span>
         <span className="text-[15vw] md:text-[130px] scale-x-110 origin-left">ÊN</span>
         <span className="text-[15vw] md:text-[130px] scale-x-110 origin-left">CIA</span>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 w-full h-[35%] md:h-[45%] z-20 pointer-events-none">
+      <div className="absolute inset-x-0 bottom-0 w-full h-[200px] md:h-[45%] z-20 pointer-events-none">
         <img src={gramaImg} alt="Grama" className="w-full h-full object-cover object-top dark:hidden transition-all duration-500" draggable="false" />
         <img src={gramaNoiteImg} alt="Grama" className="hidden dark:block w-full h-full object-cover object-top scale-[1.25] origin-bottom transition-all duration-500" draggable="false" />
       </div>
 
-      <div className="absolute inset-0 z-30 max-w-[1400px] mx-auto overflow-y-auto md:overflow-visible hide-scroll flex flex-col md:block items-center gap-20 pt-[45vh] pb-[25vh] md:p-0">
+      <div className="relative w-full md:absolute md:inset-0 z-30 max-w-[1400px] mx-auto flex flex-col md:block items-center gap-16 pt-12 pb-32 md:p-0">
         
         {experiences.map((exp) => (
           <div 
