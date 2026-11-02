@@ -24,10 +24,13 @@ const cogumeloImg = getAsset('cogumelo');
 // 1. SEUS LINKS — TROQUE PELOS SEUS DADOS REAIS
 // ============================================================================
 const EMAIL = 'orion.franca19@gmail.com';
+const CURRICULO_URL = '../../../public/orion.pdf';
+
 const LINKS = [
-    { label: 'E-mail',    valor: EMAIL,                href: `mailto:${EMAIL}`,                   icone: 'mail' },
-    { label: 'GitHub',    valor: 'github.com/orioncavalcante',  href: 'https://github.com/orioncavalcante',       icone: 'github' },
-    { label: 'LinkedIn',  valor: 'in/orioncavalcante',          href: 'https://www.linkedin.com/in/orioncavalcante/',  icone: 'linkedin' }
+    { label: 'E-mail',    valor: EMAIL, href: `mailto:${EMAIL}`, icone: 'mail' },
+    { label: 'GitHub',    valor: 'github.com/orioncavalcante', href: 'https://github.com/orioncavalcante', icone: 'github' },
+    { label: 'LinkedIn',  valor: 'in/orioncavalcante', href: 'https://www.linkedin.com/in/orioncavalcante/', icone: 'linkedin' },
+    { label: 'Currículo', valor: 'Baixar PDF', href: CURRICULO_URL, icone: 'download', download: true },
 ];
 
 // ============================================================================
@@ -48,6 +51,7 @@ const paths = {
     linkedin: <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.83v1.54h.05c.53-1 1.84-2.06 3.79-2.06 4.05 0 4.8 2.66 4.8 6.12V21h-4v-4.9c0-1.17-.02-2.67-1.63-2.67-1.63 0-1.88 1.27-1.88 2.59V21h-4V9.75Z" />,
     whatsapp: <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4Zm-3 3.5c-.2 0-.5.1-.7.4-.3.3-1 1-1 2.3s1 2.7 1.1 2.9c.1.2 2 3.1 4.9 4.3 2.4.9 2.9.7 3.4.7.5-.1 1.7-.7 1.9-1.400.2-.7.2-1.200.2-1.400l-.5-.3-1.800-.9c-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1-.2-.1-1-.4-1.900-1.200-.7-.6-1.200-1.400-1.300-1.600-.1-.2 0-.4.1-.5l.4-.5.3-.4c.1-.2 0-.4 0-.5l-.8-2c-.2-.5-.4-.4-.6-.4H9Z" />,
     arrow: <path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square" />,
+    download: <path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z" />,
 };
 
 function Icone({ nome, className = 'w-5 h-5' }) {
@@ -142,6 +146,7 @@ export function Contact() {
                                         <a
                                             href={item.href}
                                             {...(externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                                            {...(item.download ? { download: 'Curriculo-Orion-Franca.pdf' } : {})}
                                             className="group grid grid-cols-[28px_100px_1fr_auto] items-center gap-3 py-3 border-b border-[#DE1B1B]/30 text-[#DE1B1B] hover:border-[#DE1B1B] transition-colors"
                                         >
                                             <Icone nome={item.icone} className="w-6 h-6 transition-transform group-hover:scale-125 group-hover:-rotate-6" />
