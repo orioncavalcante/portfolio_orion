@@ -6,6 +6,7 @@ import { ThemeToggle } from './components/ui/ThemeToggle';
 // Páginas
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
 
 // Componente para proteger rotas (Só passa quem tem `user`)
 function RotaProtegida({ children }) {
@@ -39,10 +40,7 @@ export default function App() {
                             path="/dashboard" 
                             element={
                                 <RotaProtegida>
-                                    <div className="min-h-screen p-10 dark:bg-zinc-900 dark:text-white font-mono font-bold">
-                                        <h1 className="text-4xl text-[#DE1B1B] mb-4">DASHBOARD EM CONSTRUÇÃO 🍄</h1>
-                                        <p>Bem-vindo! Você conseguiu burlar a segurança e fazer login.</p>
-                                    </div>
+                                    <Dashboard />
                                 </RotaProtegida>
                             } 
                         />
