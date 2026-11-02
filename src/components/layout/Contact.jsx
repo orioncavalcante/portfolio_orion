@@ -239,14 +239,19 @@ export function Contact() {
             </div>
 
             {/* ================= FUNDO: COLINA DE GRAMA + COGUMELOS IMAGENS ================= */}
-            <div className="absolute inset-x-0 bottom-0 w-full h-[30%] md:h-[40%] z-10 pointer-events-none">
+            <div className="absolute inset-x-0 bottom-0 w-full h-[30%] md:h-[40%] z-10 overflow-hidden pointer-events-none">
                 {gramaImg && (
                     <img src={gramaImg} alt="Grama" className="w-full h-full object-cover object-top dark:hidden" draggable="false" />
                 )}
                 {gramaNoiteImg && (
-                    <img src={gramaNoiteImg} alt="Grama noturna" className="hidden dark:block w-full h-full object-cover object-top scale-[1.75] origin-bottom" draggable="false" />
+                    <img
+                        src={gramaNoiteImg}
+                        alt="Grama noturna"
+                        className="hidden dark:block w-full h-full object-cover object-top max-md:translate-y-[33%] md:scale-[1.75] md:origin-bottom"
+                        draggable="false"
+                    />
                 )}
-                
+
                 {cogumeloImg && (
                     <div className="absolute inset-0 max-w-[1400px] mx-auto">
                         <img src={cogumeloImg} alt="Cogumelo" className="cogu-bob absolute w-12 md:w-20 left-[4%] top-[10%]" style={{ imageRendering: 'pixelated' }} />
