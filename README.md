@@ -1,16 +1,104 @@
-# React + Vite
+# Portfólio Full-Stack — Orion França
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Portfólio interativo em estilo Pixel Art / Neo-Brutalista com painel administrativo (Dashboard), autenticação, gerenciamento dinâmico de projetos/experiências/mensagens no **Supabase**, integração com a **API do GitHub** e envio de e-mails via **EmailJS**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 1. Stack Tecnológica
 
-## React Compiler
+| Camada                               | Tecnologia                       | Papel no Projeto                                                                                  |
+| :----------------------------------- | :------------------------------- | :------------------------------------------------------------------------------------------------ |
+| **Front-end Core**             | React 19 + Vite 8                | Renderização declarativa de UI, HMR rápido e bundle otimizado                                  |
+| **Estilização**              | Tailwind CSS v4 + CSS Custom     | Utilitários responsivos, Dark Mode (`ThemeContext`) e estética Neo-Brutalista / Pixel Art     |
+| **Roteamento**                 | React Router DOM v7              | Rotas públicas (`/`, `*` 404), autenticação (`/login`) e rota protegida (`/dashboard`) |
+| **Formulários & Validação** | React Hook Form + Zod            | Controle performático de formulários sem re-renders desnecessários e validação por schema    |
+| **Back-end / BaaS**            | Supabase (PostgreSQL + Auth)     | Banco de dados relacional para projetos, experiências e mensagens + Autenticação JWT           |
+| **Integrações Externas**     | GitHub REST API + EmailJS        | Listagem dinâmica de repositórios públicos e disparo de notificações por e-mail              |
+| **Testes E2E**                 | Playwright + Python (`pytest`) | Testes ponta a ponta cobrindo bloqueio de rota privada, validação Zod e página 404             |
+| **Deploy & Hosting**           | Vercel                           | CI/CD automático integrado ao GitHub com SPA Rewrite (`vercel.json`)                           |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 2. Arquitetura e Estrutura de Pastas
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Critério de Divisão de Componentes
+
+A arquitetura segue a separação por **responsabilidade e escopo de reutilização**:
+
+- **`src/pages/`**: Componentes de nível de rota (`Home`, `Login`, `Dashboard`, `NotFound`). Coordenam o layout da página e o consumo de contextos.
+- **`src/components/layout/`**: Seções estruturais de domínio da página inicial (`Navbar`, `Hero`, `About`, `Experience`, `Projects`, `Contact`, `Footer`).
+- **`src/components/ui/`**: Elementos visuais atômicos ou interativos reutilizáveis (botões, cursores, elementos decorativos).
+- **`src/contexts/`**: Estado global compartilhado (`AuthContext` para sessão do Supabase e `ThemeContext` para alternância Dia/Noite com persistência em `localStorage`).
+- **`src/lib/`**: Instâncias e clientes de serviços externos isolados da UI (`supabase.js`).
+
+```
+meu-portfolio-react/
+├── .agent/                        # Harness de IA versionado no repositório
+│   ├── rules/
+│   │   └── coding-and-git-standards.md
+│   ├── skills/
+│   │   └── portfolio-quality-gate/
+│   │       └── SKILL.md
+│   └── mcp.json                   # Conectores MCP configurados para o agente
+├── AGENTS.md                      # Instruções globais de arquitetura e padrões para a IA
+├── public/                        # Arquivos estáticos públicos (currículo PDF)
+├── src/
+│   ├── assets/                    # Sprites pixel art (dia/noite), ícones e imagens
+│   ├── components/
+│   │   ├── layout/                # Seções da aplicação (Hero, About, Experience, Projects, Contact, Navbar, Footer)
+│   │   └── ui/                    # Componentes visuais reutilizáveis
+│   ├── contexts/                  # AuthContext (Supabase Auth) e ThemeContext (Dark/Light Mode)
+│   ├── lib/                       # Cliente Supabase (supabase.js)
+│   ├── pages/                     # Rotas: Home.jsx, Login.jsx, Dashboard.jsx, NotFound.jsx
+│   ├── App.jsx                    # Configuração de rotas e guardião <RotaProtegida>
+│   └── main.jsx                   # Ponto de entrada da árvore React
+├── tests/
+│   └── test_portfolio.py          # Testes E2E automatizados com Playwright + Python
+└── vercel.json                    # Regra de rewrite para suporte a SPA na Vercel
+```
+
+---
+
+## 3. Diagrama de Fluxo de Dados
+
+```mermaid
+flowchart LR
+    subgraph Visitante["Visitante (Rota Pública /)"]
+        UI_Home["Home (Hero, About, Experience, Projects, Contact)"]
+        Form["Contact Form (React Hook Form + Zod)"]
+    end
+
+    subgraph Admin["Administrador (/login -> /dashboard)"]
+        Guard["RotaProtegida (AuthContext)"]
+        Dash["Dashboard CRUD"]
+    end
+
+    subgraph Servicos["Serviços & Persistência"]
+        SB_DB[("Supabase PostgreSQL\n(projects, experiences, messages)")]
+        SB_Auth["Supabase Auth (JWT)"]
+        GH["GitHub REST API\n(/users/orionfranca/repos)"]
+        Email["EmailJS API"]
+    end
+
+    UI_Home -->|"SELECT projetos & experiências"| SB_DB
+    UI_Home -->|"GET repositórios públicos"| GH
+    Form -->|"1. Valida Schema Zod\n2. INSERT mensagem"| SB_DB
+    Form -->|"3. Envia notificação"| Email
+
+    Guard -->|"Verifica sessão ativa"| SB_Auth
+    Guard -->|"Autenticado"| Dash
+    Dash -->|"CRUD Projetos / Experiências\n& Marcar Mensagem Respondida"| SB_DB
+```
+
+---
+
+## 4. Fluxo de Alteração: Da Branch ao Deploy (CI/CD)
+
+```mermaid
+flowchart LR
+    A["1. Feature Branch\n(feat/* ou fix/*)"] --> B["2. Desenvolvimento + Harness IA\n(Seguindo AGENTS.md)"]
+    B --> C["3. Verificação Local\n(ESLint + Vite Build + Playwright E2E)"]
+    C --> D["4. Commit Semântico\n(Conventional Commits)"]
+    D --> E["5. Push & Merge na main\n(GitHub)"]
+    E --> F["6. Vercel CI/CD\n(Preview Deploy -> Production Deploy)"]
+```
