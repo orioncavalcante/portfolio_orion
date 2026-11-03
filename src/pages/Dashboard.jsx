@@ -7,43 +7,31 @@ export function Dashboard() {
     const [textoSobre, setTextoSobre] = useState('');
     const [stacks, setStacks] = useState('');
     const [mensagens, setMensagens] = useState([]);
+    
+    // Estados para Experiências
+    const [experiencias, setExperiencias] = useState([]);
+    const [editandoExp, setEditandoExp] = useState(null);
+    const [mostrarFormExp, setMostrarFormExp] = useState(false);
+    const [formExp, setFormExp] = useState({ role: '', company: '', period: '', description: '', position_classes: '' });
+    
     const [salvando, setSalvando] = useState(false);
     const navigate = useNavigate();
 
     const carregarMensagens = async () => {
-        // 1. Pega mensagens salvas localmente (fallback / garantia imediata)
         let locais = [];
-        try {
-            locais = JSON.parse(localStorage.getItem('mensagens_portfolio') || '[]');
-        } catch (e) {
-            console.warn(e);
-        }
-
-        // 2. Busca todas do Supabase sem .order('data_envio') fixo (pois no Supabase o padrão costuma ser 'created_at')
-        const { data: dadosMensagens, error } = await supabase.from('mensagens').select('*');
-        if (error) {
-            console.warn('Aviso ao buscar mensagens do Supabase:', error.message);
-        }
-
+        try { locais = JSON.parse(localStorage.getItem('mensagens_portfolio') || '[]'); } catch (e) {}
+        const { data: dadosMensagens } = await supabase.from('mensagens').select('*');
         const doBanco = dadosMensagens || [];
-
-        // 3. Mescla as mensagens do Supabase com as locais (evitando duplicadas de mesmo nome + email + mensagem)
         const mapaRespondidas = JSON.parse(localStorage.getItem('mensagens_respondidas') || '{}');
         const combinadas = [...doBanco];
 
         for (const msgLocal of locais) {
             const jaExisteNoBanco = combinadas.some(
-                (m) =>
-                    m.nome === msgLocal.nome &&
-                    m.email === msgLocal.email &&
-                    m.mensagem === msgLocal.mensagem
+                (m) => m.nome === msgLocal.nome && m.email === msgLocal.email && m.mensagem === msgLocal.mensagem
             );
-            if (!jaExisteNoBanco) {
-                combinadas.push(msgLocal);
-            }
+            if (!jaExisteNoBanco) combinadas.push(msgLocal);
         }
 
-        // Normaliza data e status de respondida, e ordena da mais recente para a mais antiga
         const formatadas = combinadas
             .map((m) => ({
                 ...m,
@@ -55,52 +43,37 @@ export function Dashboard() {
         setMensagens(formatadas);
     };
 
+    const carregarExperiencias = async () => {
+        const { data } = await supabase.from('experiencias').select('*').order('ordem', { ascending: true });
+        if (data) setExperiencias(data);
+    };
+
     useEffect(() => {
         async function carregarDados() {
-            // 1. Carrega o Sobre e Stacks
             const { data: dadosSobre } = await supabase.from('sobre').select('texto, stacks').eq('id', 1).single();
             if (dadosSobre) {
                 setTextoSobre(dadosSobre.texto || '');
                 setStacks(dadosSobre.stacks || '');
             }
-
-            // 2. Carrega as Mensagens
             await carregarMensagens();
+            await carregarExperiencias();
         }
         carregarDados();
     }, []);
 
-    // Recarrega mensagens sempre que abrir a aba de mensagens
     useEffect(() => {
-        if (abaAtiva === 'mensagens') {
-            carregarMensagens();
-        }
+        if (abaAtiva === 'mensagens') carregarMensagens();
+        if (abaAtiva === 'experiencias') carregarExperiencias();
     }, [abaAtiva]);
 
     const alternarRespondida = async (msg) => {
         const novoStatus = !msg.respondida;
-
-        // Atualiza na tela imediatamente
-        setMensagens((prev) =>
-            prev.map((item) => (item.id === msg.id ? { ...item, respondida: novoStatus } : item))
-        );
-
-        // Salva no localStorage
+        setMensagens((prev) => prev.map((item) => (item.id === msg.id ? { ...item, respondida: novoStatus } : item)));
         try {
             const mapaRespondidas = JSON.parse(localStorage.getItem('mensagens_respondidas') || '{}');
             mapaRespondidas[msg.id] = novoStatus;
             localStorage.setItem('mensagens_respondidas', JSON.stringify(mapaRespondidas));
-
-            const locais = JSON.parse(localStorage.getItem('mensagens_portfolio') || '[]');
-            const locaisAtualizadas = locais.map((item) =>
-                item.id === msg.id ? { ...item, respondida: novoStatus } : item
-            );
-            localStorage.setItem('mensagens_portfolio', JSON.stringify(locaisAtualizadas));
-        } catch (e) {
-            console.warn(e);
-        }
-
-        // Tenta atualizar no Supabase também (caso a coluna 'respondida' exista lá)
+        } catch (e) {}
         await supabase.from('mensagens').update({ respondida: novoStatus }).eq('id', msg.id);
     };
 
@@ -108,13 +81,65 @@ export function Dashboard() {
         setSalvando(true);
         const { error } = await supabase.from('sobre').update({ texto: textoSobre, stacks: stacks }).eq('id', 1);
         setSalvando(false);
+        if (!error) alert('Dados atualizados com sucesso!');
+    };
+
+    // --- FUNÇÕES DE EXPERIÊNCIA ATUALIZADAS ---
+    const salvarExperiencia = async (e) => {
+        e.preventDefault();
+        setSalvando(true);
         
-        if (!error) {
-            alert('Dados atualizados com sucesso!');
-        } else {
-            alert('Erro ao salvar. Verifique o console.');
-            console.error(error);
+        let erroSupabase = null;
+
+        try {
+            if (editandoExp) {
+                const { error } = await supabase.from('experiencias').update(formExp).eq('id', editandoExp);
+                erroSupabase = error;
+            } else {
+                const novaOrdem = experiencias.length > 0 ? Math.max(...experiencias.map(e => e.ordem || 0)) + 1 : 1;
+                const { error } = await supabase.from('experiencias').insert([{ ...formExp, ordem: novaOrdem }]);
+                erroSupabase = error;
+            }
+
+            if (erroSupabase) {
+                console.error("Erro do Supabase:", erroSupabase);
+                alert("Erro ao gravar: " + erroSupabase.message);
+            } else {
+                alert("Experiência guardada com sucesso!");
+                setEditandoExp(null);
+                setMostrarFormExp(false);
+                setFormExp({ role: '', company: '', period: '', description: '', position_classes: '' });
+                await carregarExperiencias();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Ocorreu um erro inesperado no código.");
         }
+        
+        setSalvando(false);
+    };
+
+    const deletarExperiencia = async (id) => {
+        if (!window.confirm('Tem a certeza que deseja apagar esta experiência?')) return;
+        await supabase.from('experiencias').delete().eq('id', id);
+        await carregarExperiencias();
+    };
+
+    const reordenarExperiencia = async (index, direcao) => {
+        if ((direcao === -1 && index === 0) || (direcao === 1 && index === experiencias.length - 1)) return;
+        const novasExp = [...experiencias];
+        const atual = novasExp[index];
+        const trocarCom = novasExp[index + direcao];
+        
+        atual.ordem += direcao;
+        trocarCom.ordem -= direcao;
+        
+        novasExp[index] = trocarCom;
+        novasExp[index + direcao] = atual;
+        setExperiencias(novasExp);
+
+        await supabase.from('experiencias').update({ ordem: atual.ordem }).eq('id', atual.id);
+        await supabase.from('experiencias').update({ ordem: trocarCom.ordem }).eq('id', trocarCom.id);
     };
 
     const sair = async () => {
@@ -129,81 +154,53 @@ export function Dashboard() {
         { id: 'projetos', label: 'Projetos em Destaque' }
     ];
 
+    const inputClass = "w-full bg-white dark:bg-zinc-800 border-4 border-black p-3 focus:outline-none focus:border-[#DE1B1B] shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FEF08A] text-black dark:text-white";
+
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-zinc-900 flex flex-col md:flex-row font-mono transition-colors">
-            {/* SIDEBAR LATERAL */}
             <aside className="w-full md:w-72 bg-[#FEF08A] dark:bg-zinc-800 border-b-4 md:border-b-0 md:border-r-4 border-black p-6 flex flex-col shrink-0">
-                <h2 className="text-2xl font-black text-[#DE1B1B] mb-8 uppercase" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
-                    Painel Admin
-                </h2>
-                
+                <h2 className="text-2xl font-black text-[#DE1B1B] mb-8 uppercase" style={{ fontFamily: "'Archivo Black', sans-serif" }}>Painel Admin</h2>
                 <nav className="flex-1 flex flex-col gap-2">
                     {menu.map(item => (
                         <button
                             key={item.id}
-                            onClick={() => setAbaAtiva(item.id)}
+                            onClick={() => { 
+                                setAbaAtiva(item.id); 
+                                setEditandoExp(null); 
+                                setMostrarFormExp(false);
+                            }}
                             className={`text-left font-bold p-3 border-2 border-black transition-all ${
-                                abaAtiva === item.id 
-                                ? 'bg-[#DE1B1B] text-white shadow-[4px_4px_0px_#000] translate-x-[-2px] translate-y-[-2px]' 
-                                : 'bg-white dark:bg-zinc-900 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                                abaAtiva === item.id ? 'bg-[#DE1B1B] text-white shadow-[4px_4px_0px_#000] translate-x-[-2px] translate-y-[-2px]' : 'bg-white dark:bg-zinc-900 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5'
                             }`}
                         >
                             {item.label}
                         </button>
                     ))}
                 </nav>
-
-                <button 
-                    onClick={sair}
-                    className="mt-8 bg-black text-white font-bold p-3 border-2 border-black hover:bg-zinc-700 transition-colors"
-                >
-                    SAIR DA CONTA
-                </button>
+                <button onClick={sair} className="mt-8 bg-black text-white font-bold p-3 border-2 border-black hover:bg-zinc-700 transition-colors">SAIR DA CONTA</button>
             </aside>
 
-            {/* ÁREA DE CONTEÚDO PRINCIPAL */}
             <main className="flex-1 p-8 text-black dark:text-white overflow-y-auto">
-                
-                {/* Aba: Sobre Mim */}
                 {abaAtiva === 'sobre' && (
                     <div className="max-w-3xl">
                         <h3 className="text-3xl font-black mb-6 uppercase border-b-4 border-[#DE1B1B] pb-2 inline-block">Editar Sobre Mim</h3>
-                        
                         <div className="mb-6">
                             <label className="block font-black uppercase mb-2">Texto de Apresentação</label>
-                            <textarea
-                                value={textoSobre}
-                                onChange={(e) => setTextoSobre(e.target.value)}
-                                rows={8}
-                                className="w-full bg-white dark:bg-zinc-800 border-4 border-black p-4 focus:outline-none focus:border-[#DE1B1B] resize-y shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FEF08A] text-black dark:text-white"
-                            />
+                            <textarea value={textoSobre} onChange={(e) => setTextoSobre(e.target.value)} rows={8} className={inputClass} />
                         </div>
-
                         <div className="mb-8">
                             <label className="block font-black uppercase mb-2">Principais Stacks (Separadas por vírgula)</label>
-                            <textarea
-                                value={stacks}
-                                onChange={(e) => setStacks(e.target.value)}
-                                rows={3}
-                                className="w-full bg-white dark:bg-zinc-800 border-4 border-black p-4 focus:outline-none focus:border-[#DE1B1B] resize-y shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FEF08A] text-black dark:text-white"
-                            />
+                            <textarea value={stacks} onChange={(e) => setStacks(e.target.value)} rows={3} className={inputClass} />
                         </div>
-                        
-                        <button
-                            onClick={salvarSobre}
-                            disabled={salvando}
-                            className="bg-[#DE1B1B] text-white font-black text-lg py-3 px-8 border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-[0px_0px_0px_#000] transition-all disabled:opacity-50"
-                        >
-                            {salvando ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
+                        <button onClick={salvarSobre} disabled={salvando} className="bg-[#DE1B1B] text-white font-black py-3 px-8 border-4 border-black shadow-[4px_4px_0px_#000]">
+                            {salvando ? 'A GRAVAR...' : 'SALVAR ALTERAÇÕES'}
                         </button>
                     </div>
                 )}
 
-                {/* Aba: Mensagens Recebidas */}
                 {abaAtiva === 'mensagens' && (
                     <div className="max-w-4xl">
                         <h3 className="text-3xl font-black mb-6 uppercase border-b-4 border-[#DE1B1B] pb-2 inline-block">Caixa de Entrada</h3>
-                        
                         {mensagens.length === 0 ? (
                             <p className="font-bold p-6 border-4 border-black bg-white dark:bg-zinc-800 text-center">
                                 Nenhuma mensagem recebida ainda.
@@ -255,8 +252,76 @@ export function Dashboard() {
                     </div>
                 )}
 
-                {/* Módulos em construção */}
-                {(abaAtiva === 'experiencias' || abaAtiva === 'projetos') && (
+                {abaAtiva === 'experiencias' && (
+                    <div className="max-w-4xl">
+                        <h3 className="text-3xl font-black mb-6 uppercase border-b-4 border-[#DE1B1B] pb-2 inline-block">Gerenciar Experiências</h3>
+                        
+                        {!mostrarFormExp ? (
+                            <>
+                                <button 
+                                    onClick={() => {
+                                        setFormExp({ role: '', company: '', period: '', description: '', position_classes: 'md:left-[10%] md:bottom-[10%]' });
+                                        setMostrarFormExp(true);
+                                    }} 
+                                    className="mb-8 bg-green-500 text-black font-black py-3 px-6 border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-y-1"
+                                >
+                                    + ADICIONAR EXPERIÊNCIA
+                                </button>
+
+                                <div className="flex flex-col gap-4">
+                                    {experiencias.map((exp, index) => (
+                                        <div key={exp.id} className="flex flex-col md:flex-row justify-between md:items-center bg-white dark:bg-zinc-800 border-4 border-black p-4 shadow-[4px_4px_0px_#000] gap-4">
+                                            <div>
+                                                <h4 className="font-black text-lg text-[#DE1B1B]">{exp.role}</h4>
+                                                <p className="font-bold">{exp.company}</p>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                <button onClick={() => reordenarExperiencia(index, -1)} className="p-2 border-2 border-black bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300">↑</button>
+                                                <button onClick={() => reordenarExperiencia(index, 1)} className="p-2 border-2 border-black bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300">↓</button>
+                                                <button 
+                                                    onClick={() => { 
+                                                        setEditandoExp(exp.id); 
+                                                        setFormExp(exp); 
+                                                        setMostrarFormExp(true);
+                                                    }} 
+                                                    className="p-2 border-2 border-black bg-[#FEF08A] text-black font-bold uppercase"
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button onClick={() => deletarExperiencia(exp.id)} className="p-2 border-2 border-black bg-red-500 text-white font-bold uppercase">Apagar</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <form onSubmit={salvarExperiencia} className="bg-white dark:bg-zinc-800 border-4 border-black p-6 shadow-[8px_8px_0px_#000]">
+                                <h4 className="font-black text-xl mb-6">{editandoExp ? 'EDITAR EXPERIÊNCIA' : 'NOVA EXPERIÊNCIA'}</h4>
+                                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div><label className="block font-black mb-1">Cargo</label><input required value={formExp.role} onChange={(e) => setFormExp({...formExp, role: e.target.value})} className={inputClass} placeholder="Ex: DESENVOLVEDOR" /></div>
+                                    <div><label className="block font-black mb-1">Empresa</label><input required value={formExp.company} onChange={(e) => setFormExp({...formExp, company: e.target.value})} className={inputClass} placeholder="Ex: OVERBANK" /></div>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div><label className="block font-black mb-1">Período</label><input required value={formExp.period} onChange={(e) => setFormExp({...formExp, period: e.target.value})} className={inputClass} placeholder="Ex: out. 2026 - o momento" /></div>
+                                    <div>
+                                        <label className="block font-black mb-1">Posição na Tela (Tailwind)</label>
+                                        <input required value={formExp.position_classes} onChange={(e) => setFormExp({...formExp, position_classes: e.target.value})} className={inputClass} placeholder="Ex: md:left-[18%] md:bottom-[15%]" />
+                                    </div>
+                                </div>
+                                <div className="mb-6">
+                                    <label className="block font-black mb-1">Descrição (Cada linha vira um tópico no card)</label>
+                                    <textarea required rows={5} value={formExp.description} onChange={(e) => setFormExp({...formExp, description: e.target.value})} className={inputClass} placeholder="Linha 1...&#10;Linha 2..." />
+                                </div>
+                                <div className="flex flex-wrap gap-4">
+                                    <button type="submit" disabled={salvando} className="bg-[#DE1B1B] text-white font-black py-3 px-8 border-4 border-black">{salvando ? 'A GRAVAR...' : 'SALVAR'}</button>
+                                    <button type="button" onClick={() => { setEditandoExp(null); setMostrarFormExp(false); setFormExp({ role: '', company: '', period: '', description: '', position_classes: '' }); }} className="bg-zinc-300 text-black font-black py-3 px-8 border-4 border-black">CANCELAR</button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                )}
+
+                {abaAtiva === 'projetos' && (
                     <div>
                         <h3 className="text-3xl font-black mb-6 uppercase border-b-4 border-[#DE1B1B] pb-2 inline-block">{abaAtiva}</h3>
                         <p className="font-bold">Módulo em construção para o próximo passo!</p>
