@@ -7,6 +7,7 @@ import { ThemeToggle } from './components/ui/ThemeToggle';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import { NotFound } from './pages/NotFound';
 
 // Componente para proteger rotas (Só passa quem tem `user`)
 function RotaProtegida({ children }) {
@@ -46,16 +47,7 @@ export default function App() {
                         />
                         
                         {/* Requisito 1: Página amigável para Rota Inexistente (404) */}
-                        <Route 
-                            path="*" 
-                            element={
-                                <div className="min-h-screen flex flex-col items-center justify-center dark:bg-zinc-900 font-mono p-6 text-center">
-                                    <h1 className="text-9xl font-black text-[#DE1B1B] border-4 border-black bg-[#FEF08A] p-4 shadow-[8px_8px_0px_#000] mb-6">404</h1>
-                                    <p className="font-bold text-xl dark:text-white mb-4">Página não encontrada!</p>
-                                    <a href="/" className="bg-black text-white p-3 border-2 border-black hover:bg-[#DE1B1B] transition-colors">VOLTAR AO INÍCIO</a>
-                                </div>
-                            } 
-                        />
+                        <Route path="*" element={<NotFound />} />
                     </Routes>
                 </BrowserRouter>
             </ThemeProvider>
