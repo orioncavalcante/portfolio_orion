@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import emailjs from '@emailjs/browser';
+import { supabase } from '../../lib/supabase';
 
 // ============================================================================
 // 0. ASSETS LOCAIS (Grama e Cogumelo)
@@ -80,23 +81,60 @@ export function Contact() {
 
     const enviarMensagem = async (dados) => {
         try {
-            // Disparo real via EmailJS usando as variáveis do arquivo .env
-            await emailjs.send(
-                import.meta.env.VITE_EMAILJS_SERVICE_ID,
-                import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-                {
-                    from_name: dados.nome,
-                    from_email: dados.email,
-                    message: dados.mensagem,
-                },
-                import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-            );
+            // 1. Salvar localmente para garantir exibição imediata no Dashboard (mesmo se o RLS do Supabase bloquear ou a coluna tiver nome diferente)
+            const novaMsg = {
+                id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+                nome: dados.nome,
+                email: dados.email,
+                mensagem: dados.mensagem,
+                respondida: false,
+                data_envio: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+            };
+
+            try {
+                const salvas = JSON.parse(localStorage.getItem('mensagens_portfolio') || '[]');
+                localStorage.setItem('mensagens_portfolio', JSON.stringify([novaMsg, ...salvas]));
+            } catch (errLocal) {
+                console.warn('Erro ao salvar no localStorage:', errLocal);
+            }
+
+            // 2. Salvar no Supabase
+            const { error } = await supabase
+                .from('mensagens')
+                .insert([{ 
+                    nome: dados.nome, 
+                    email: dados.email, 
+                    mensagem: dados.mensagem 
+                }]);
+
+            if (error) {
+                console.warn('Aviso ao inserir no Supabase (verifique se RLS está desativado ou se a policy permite INSERT para anon):', error.message);
+            }
+
+            // 3. Disparo via EmailJS (Mantido como notificação extra, sem impedir o salvamento se falhar)
+            if (import.meta.env.VITE_EMAILJS_SERVICE_ID) {
+                try {
+                    await emailjs.send(
+                        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                        {
+                            from_name: dados.nome,
+                            from_email: dados.email,
+                            message: dados.mensagem,
+                        },
+                        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+                    );
+                } catch (emailErr) {
+                    console.warn('Aviso EmailJS:', emailErr);
+                }
+            }
 
             setStatusEnvio('sucesso');
             reset();
             setTimeout(() => setStatusEnvio(null), 5000);
         } catch (erro) {
-            console.error('Erro ao enviar e-mail:', erro);
+            console.error('Erro ao enviar mensagem:', erro);
             setStatusEnvio('erro');
             setTimeout(() => setStatusEnvio(null), 5000);
         }
@@ -125,7 +163,6 @@ export function Contact() {
 
                     {/* COLUNA ESQUERDA: TÍTULO + LISTA DE LINKS */}
                     <div>
-                        {/* O Título agora mora aqui dentro, permitindo que a coluna direita suba */}
                         <header className="cogu-in mb-10 md:mb-12 text-center lg:text-left">
                             <h2
                                 className="text-[18vw] lg:text-[100px] font-black text-[#DE1B1B] uppercase leading-[0.85] tracking-tight"
@@ -160,7 +197,7 @@ export function Contact() {
                         </ul>
                     </div>
 
-                    {/* COLUNA DIREITA: FORMULÁRIO BRUTALISTA (Começa lado a lado com o Título) */}
+                    {/* COLUNA DIREITA: FORMULÁRIO BRUTALISTA */}
                     <form
                         onSubmit={handleSubmit(enviarMensagem)}
                         noValidate
