@@ -102,3 +102,47 @@ flowchart LR
     D --> E["5. Push & Merge na main\n(GitHub)"]
     E --> F["6. Vercel CI/CD\n(Preview Deploy -> Production Deploy)"]
 ```
+
+
+---
+
+## 5. Como Baixar e Rodar em Outros Dispositivos
+
+### Pré-requisitos
+- **Node.js** (versão 18 ou superior)
+- **Git** instalado
+- *(Opcional, para rodar os testes E2E)* **Python 3.10+**
+
+### Passo a Passo
+
+1. **Clonar o repositório:**
+   ```bash
+   git clone https://github.com/SEU-USUARIO/meu-portfolio-react.git
+   cd meu-portfolio-react
+   ```
+
+2. **Instalar as dependências do projeto:**
+   ```bash
+   npm install
+   ```
+
+3. **Configurar as variáveis de ambiente (`.env`):**
+   Crie um arquivo chamado `.env` na raiz do projeto com as chaves do seu projeto no Supabase:
+   ```env
+   VITE_SUPABASE_URL=sua_url_do_supabase
+   VITE_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase
+   ```
+
+4. **Iniciar o servidor de desenvolvimento:**
+   ```bash
+   npm run dev
+   ```
+   O site ficará disponível em `http://localhost:5173`.
+
+5. **Executar os testes automatizados (Opcional):**
+   Em outro terminal (com o `npm run dev` rodando):
+   ```bash
+   pip install playwright pytest-playwright
+   python -m playwright install chromium
+   python tests/test_portfolio.py
+   ```
